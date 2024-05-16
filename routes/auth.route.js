@@ -1,21 +1,15 @@
 const {
-  isAdminAuth,
-  allUser,
-  postSignin,
-  postSignup,
+  signup,
+  login,
+  loginGoogle,
+  confirmCode,
 } = require("../controller/auth.controller.js");
 const express = require("express");
 const router = express.Router();
-// const authController = require("../controller/auth");
-const {
-  loginCheck,
-  isAuth,
-  isAdmin,
-} = require("../middleware/auth.middleware.js");
 
-router.post("/isadmin", isAdminAuth);
-router.post("/signup", postSignup);
-router.post("/signin", postSignin);
-router.post("/user", loginCheck, isAuth, isAdmin, allUser);
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/loginGoogle", loginGoogle);
+router.post("/confirmCode/:token", confirmCode);
 
 module.exports = router;

@@ -1,45 +1,72 @@
 const mongoose = require("mongoose");
+const roleEnum = {
+  ADMIN: 0,
+  STAFF: 1,
+  SHIP: 2,
+  USER: 3,
+};
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: true,
-      maxlength: 32,
     },
     email: {
       type: String,
       required: true,
       trim: true,
       index: { unique: true },
-      match: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+    },
+    phone: {
+      type: String,
+      // required: true,
+      trim: true,
+      index: { unique: true },
+    },
+    address: {
+      type: String,
+      // required: true,
+      // default: "Da Nang",
+    },
+    avatar: {
+      type: String,
+      default: "/defaultAvatar.png",
+    },
+    nation: {
+      type: String,
+      required: true,
+      default: "Viet Nam",
+    },
+    postcode: {
+      type: String,
+      required: true,
+      default: 1,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
-    userRole: {
-      type: Number,
-      required: true,
-    },
-    phoneNumber: {
-      type: Number,
-    },
-    userImage: {
-      type: String,
-      default: "user.png",
-    },
-    verified: {
-      type: String,
-      default: false,
-    },
-    secretKey: {
+    code: {
       type: String,
       default: null,
     },
-    history: {
-      type: Array,
-      default: [],
+    role: {
+      type: Number,
+      enum: [roleEnum.ADMIN, roleEnum.STAFF, roleEnum.SHIP, roleEnum.USER],
+      default: roleEnum.USER,
+    },
+    resetToken: {
+      type: String,
+      default: null,
+    },
+    createToken: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }

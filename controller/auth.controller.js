@@ -1,137 +1,73 @@
-const { toTitleCase, validateEmail } = require("../config/function");
-const bcrypt = require("bcryptjs");
-const userModel = require("../models/users.model");
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/keys");
+const {
+  signup,
+  login,
+  loginGoogle,
+  confirmCode,
+} = require("../services/auth.service");
+const { validateEmail } = require("../config/validateInput");
 
-exports.isAdminAuth = async (req, res) => {
-  let { loggedInUserId } = req.body;
-  try {
-    let loggedInUserRole = await userModel.findById(loggedInUserId);
-    res.json({ role: loggedInUserRole.userRole });
-  } catch {
-    res.status(404);
-  }
-};
+exports.signup = async (req, res) => {
+  let { fullName, email, phone, address, avatar, nation, postcode, password } =
+    req.body;
 
-exports.allUser = async (req, res) => {
-  try {
-    let allUser = await userModel.find({});
-    res.json({ users: allUser });
-  } catch {
-    res.status(404);
-  }
-};
-
-/* User Registration/Signup controller  */
-exports.postSignup = async (req, res) => {
-  let { name, email, password, cPassword } = req.body;
-  let error = {};
-  if (!name || !email || !password || !cPassword) {
-    error = {
-      ...error,
-      name: "Filed must not be empty",
+  if (!fullName || !email || !phone || !address || !nation || !postcode) {
+    return res.json({
+      fullName: "Filed must not be empty",
       email: "Filed must not be empty",
+      phone: "Filed must not be empty",
+      address: "Filed must not be empty",
+      nation: "Filed must not be empty",
+      postcode: "Filed must not be empty",
       password: "Filed must not be empty",
-      cPassword: "Filed must not be empty",
-    };
-    return res.json({ error });
+    });
   }
-  if (name.length < 3 || name.length > 25) {
-    error = { ...error, name: "Name must be 3-25 charecter" };
-    return res.json({ error });
-  } else {
+  try {
     if (validateEmail(email)) {
-      name = toTitleCase(name);
-      if ((password.length > 255) | (password.length < 8)) {
-        error = {
-          ...error,
-          password: "Password must be 8 charecter",
-          name: "",
-          email: "",
-        };
-        return res.json({ error });
-      } else {
-        // If Email & Number exists in Database then:
-        try {
-          password = bcrypt.hashSync(password, 10);
-          const data = await userModel.findOne({ email: email });
-          if (data) {
-            error = {
-              ...error,
-              password: "",
-              name: "",
-              email: "Email already exists",
-            };
-            return res.json({ error });
-          } else {
-            let newUser = new userModel({
-              name,
-              email,
-              password,
-              // ========= Here role 1 for admin signup role 0 for customer signup =========
-              userRole: 0, // Field Name change to userRole from role
-            });
-            newUser
-              .save()
-              .then((data) => {
-                return res.json({
-                  success: "Account create successfully. Please login",
-                });
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      }
+      let result = await signup(req.body);
+      return res.json({
+        error: result.error,
+        user: result.user,
+      });
     } else {
-      error = {
-        ...error,
-        password: "",
-        name: "",
-        email: "Email is not valid",
-      };
-      return res.json({ error });
+      return res.json({ error: "Email is not valid" });
     }
+  } catch (error) {
+    return res.json({ error: error });
   }
 };
-
-/* User Login/Signin controller  */
-exports.postSignin = async (req, res) => {
+exports.login = async (req, res) => {
   let { email, password } = req.body;
   if (!email || !password) {
     return res.json({
       error: "Fields must not be empty",
     });
+  } else {
+    let result = await login(req.body);
+    return res.json({
+      error: result.error,
+      user: result.user,
+      token: result.token,
+    });
   }
-  try {
-    const data = await userModel.findOne({ email: email });
-    if (!data) {
-      return res.json({
-        error: "Invalid email or password",
-      });
-    } else {
-      const login = await bcrypt.compare(password, data.password);
-      if (login) {
-        const token = jwt.sign(
-          { _id: data._id, role: data.userRole },
-          JWT_SECRET
-        );
-        const encode = jwt.verify(token, JWT_SECRET);
-        return res.json({
-          token: token,
-          user: encode,
-        });
-      } else {
-        return res.json({
-          error: "Invalid email or password",
-        });
-      }
-    }
-  } catch (err) {
-    console.log(err);
+};
+
+exports.loginGoogle = async (req, res) => {
+  let { email, name, photo } = req.body;
+  if (!email || !photo || !name) {
+    return res.json({ error: "Email, name or photo can't empty!" });
+  } else {
+    let result = await loginGoogle(req.body);
+    return res.json({
+      user: result.user,
+      access_token: result.access_token,
+      error: result.error,
+    });
   }
+};
+
+exports.confirmCode = async (req, res) => {
+  let token = req.params.token;
+  let code = req.body.code;
+  let result = await confirmCode(code, token);
+  return res.json({ error: result.error, success: result.success });
 };

@@ -1,32 +1,15 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const mongoose = require("mongoose");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
 const authRouter = require("./routes/auth.route.js");
 const usersRouter = require("./routes/users.route.js");
-const { loginCheck } = require("./middleware/auth.middleware");
-const CreateAllFolder = require("./config/uploadFolderCreateScript");
+const { connectDB } = require("./config/connectDB.js");
 
-CreateAllFolder();
-
-// Database Connection
-mongoose
-  .connect(process.env.DATABASE, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-  })
-  .then(() =>
-    console.log(
-      "==============Mongodb Database Connected Successfully=============="
-    )
-  )
-  .catch((err) => console.log("Database Not Connected !!!"));
-
+//connectDb
+connectDB();
 // Middleware
 app.use(morgan("dev"));
 app.use(cookieParser());
