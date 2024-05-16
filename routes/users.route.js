@@ -3,10 +3,17 @@ const router = express.Router();
 const {
   forgotSendEmail,
   forgotPassword,
-  // changePassword,
+  changePassword,
+  create,
 } = require("../controller/users.controller");
+
+//user
 router.post("/forgotPassword", forgotSendEmail);
 router.put("/forgotPassword/:token", forgotPassword);
-// router.put("/changePassword", changePassword);
+///thiếu xác thức
+router.put("/changePassword", changePassword);
+
+//admin
+router.post("/create", create);
 
 module.exports = router;

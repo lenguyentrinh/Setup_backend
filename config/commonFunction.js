@@ -44,6 +44,7 @@ exports.findUserByPhone = async (phone) => {
 exports.hashUserPassword = async (password) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log("test 1", password);
       var hashPassword = await bcrypt.hashSync(password, salt);
       resolve(hashPassword);
     } catch (error) {

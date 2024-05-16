@@ -49,7 +49,7 @@ exports.signup = async (data) => {
         resolve({ error: "Email already exists" });
       }
     } catch (error) {
-      reject({ error: error });
+      reject(error);
     }
   });
 };
@@ -78,7 +78,7 @@ exports.login = async (data) => {
         }
       }
     } catch (error) {
-      reject({ error: error });
+      reject(error);
     }
   });
 };
@@ -104,7 +104,7 @@ exports.loginGoogle = async (data) => {
         resolve({ user: user, access_token: token });
       }
     } catch (error) {
-      reject({ error: error });
+      reject(error);
     }
   });
 };
@@ -133,7 +133,7 @@ exports.confirmCode = async (code, token) => {
         resolve({ error: "Token is error !!" });
       }
     } catch (error) {
-      reject({ error: error });
+      reject(error);
     }
   });
 };
