@@ -3,51 +3,43 @@ const {
   login,
   loginGoogle,
   confirmCode,
-} = require("../services/auth.service");
-const { validateEmail } = require("../config/validateInput");
+} = require("../services/auths.service");
+const {
+  checkInputSignUp,
+  checkInputLogin,
+} = require("../utils/checkInputUser");
 
 exports.signup = async (req, res) => {
-  let { fullName, email, phone, address, avatar, nation, postcode, password } =
-    req.body;
-
-  if (!fullName || !email || !phone || !address || !nation || !postcode) {
-    return res.json({
-      fullName: "Filed must not be empty",
-      email: "Filed must not be empty",
-      phone: "Filed must not be empty",
-      address: "Filed must not be empty",
-      nation: "Filed must not be empty",
-      postcode: "Filed must not be empty",
-      password: "Filed must not be empty",
-    });
-  }
-  try {
-    if (validateEmail(email)) {
+  let error = checkInputSignUp(req.body);
+  if (error.length == 0) {
+    try {
       let result = await signup(req.body);
       return res.json({
-        error: result.error,
         user: result.user,
+        message: result.message,
+        error: result.error,
+        statusCode: result.statusCode,
       });
-    } else {
-      return res.json({ error: "Email is not valid" });
+    } catch (error) {
+      return res.json({ error: error });
     }
-  } catch (error) {
-    return res.json({ error: error });
+  } else {
+    res.json({ message: error, error: "Bad Request", statusCode: 400 });
   }
 };
 exports.login = async (req, res) => {
-  let { email, password } = req.body;
-  if (!email || !password) {
-    return res.json({
-      error: "Fields must not be empty",
-    });
-  } else {
+  let error = checkInputLogin(req.body);
+  if (error.length == 0) {
     let result = await login(req.body);
     return res.json({
-      error: result.error,
       user: result.user,
+      message: result.message,
+      error: result.error,
+      statusCode: result.statusCode,
       token: result.token,
     });
+  } else {
+    res.json({ message: error, error: "Bad Request", statusCode: 400 });
   }
 };
 

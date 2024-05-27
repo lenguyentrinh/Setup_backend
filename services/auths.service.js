@@ -7,15 +7,14 @@ const {
   findUserByPhone,
   validateUserByToken,
   hashUserPassword,
-} = require("../config/commonFunction");
+} = require("../utils/commonFunction");
 exports.signup = async (data) => {
   return new Promise(async (resolve, reject) => {
     try {
       let user = await findUserByEmail(data.email);
-      console.log(user);
       if (!user) {
-        let userBtPhone = await findUserByPhone(data.phone);
-        if (!userBtPhone) {
+        let userByPhone = await findUserByPhone(data.phone);
+        if (!userByPhone) {
           const token = jwt.sign(
             { email: data.email },
             process.env.JWT_SECRET,
@@ -23,7 +22,6 @@ exports.signup = async (data) => {
               expiresIn: "1d",
             }
           );
-          console.log("token", token);
           let hashPasswordFromBcrypt = await hashUserPassword(data.password);
           let newUser = await userModel.create({
             fullName: data.fullName,
@@ -38,17 +36,28 @@ exports.signup = async (data) => {
             role: data.role,
             resetToken: data.resetToken,
             createToken: token,
+            area: data.area,
           });
-
           newUser.save();
-          resolve({ user: newUser });
+          let userOject = newUser.toObject();
+          delete userOject.password;
+          resolve({ user: userOject });
         } else {
-          resolve({ error: "Phone already exists" });
+          resolve({
+            message: "Phone is existing !!! Please try another phone",
+            error: "Bad Request",
+            statusCode: 400,
+          });
         }
       } else {
-        resolve({ error: "Email already exists" });
+        resolve({
+          message: "Email is existing !!! Please try another email",
+          error: "Bad Request",
+          statusCode: 400,
+        });
       }
     } catch (error) {
+      console.log;
       reject(error);
     }
   });
@@ -58,8 +67,13 @@ exports.login = async (data) => {
   return new Promise(async (resolve, reject) => {
     try {
       const user = await findUserByEmail(data.email);
+      console.log(user);
       if (!user) {
-        resolve({ error: "Email is incorrect!" });
+        resolve({
+          message: "Email is incorrect!",
+          error: "Not Found",
+          statusCode: 404,
+        });
       } else {
         const comparePassword = await bcrypt.compare(
           data.password,
@@ -69,12 +83,18 @@ exports.login = async (data) => {
           const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
             expiresIn: "1d",
           });
+          let userOject = user.toObject();
+          delete userOject.password;
           resolve({
             token: token,
-            user: user,
+            user: userOject,
           });
         } else {
-          resolve({ error: "Password is incorrect" });
+          resolve({
+            message: "Password is incorrect",
+            error: "Bad Request",
+            statusCode: 400,
+          });
         }
       }
     } catch (error) {
@@ -96,6 +116,7 @@ exports.loginGoogle = async (data) => {
         let token = jwt.sign({ email: newUser.email }, process.env.JWT_SECRET, {
           expiresIn: "1d",
         });
+
         resolve({ user: newUser, access_token: token });
       } else {
         let token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {

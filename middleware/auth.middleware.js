@@ -1,42 +1,52 @@
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/keys");
 const userModel = require("../models/users.model");
 
-exports.loginCheck = (req, res, next) => {
+exports.isLogin = async (req, res, next) => {
+  let token;
   try {
-    let token = req.headers.token;
-    token = token.replace("Bearer ", "");
-    decode = jwt.verify(token, JWT_SECRET);
-    req.userDetails = decode;
-    next();
-  } catch (err) {
-    res.json({
-      error: "You must be logged in",
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await userModel
+        .findOne({ _id: decoded._id })
+        .select("-password");
+      next();
+    } else {
+      res.json({
+        message: "Please login!",
+        error: "Please login!",
+        statusCode: 403,
+      });
+    }
+    if (!token) {
+      res.status(401);
+      throw new Error("Not authorized, token failed");
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+      error: error.message,
+      statusCode: 403,
     });
   }
 };
 
-exports.isAuth = (req, res, next) => {
-  let { loggedInUserId } = req.body;
-  if (
-    !loggedInUserId ||
-    !req.userDetails._id ||
-    loggedInUserId != req.userDetails._id
-  ) {
-    res.status(403).json({ error: "You are not authenticate" });
-  }
-  next();
-};
-
-exports.isAdmin = async (req, res, next) => {
+exports.isAdmin = (req, res, next) => {
   try {
-    let reqUser = await userModel.findById(req.body.loggedInUserId);
-    // If user role 0 that's mean not admin it's customer
-    if (reqUser.userRole === 0) {
-      res.status(403).json({ error: "Access denied" });
+    console.log(req.user);
+    if (req.user && req.user.role == 0) {
+      next();
+    } else {
+      res.json({
+        message: "Forbidden resource",
+        error: "Forbidden",
+        statusCode: 403,
+      });
     }
-    next();
-  } catch {
-    res.status(404);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

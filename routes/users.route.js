@@ -4,9 +4,27 @@ const {
   forgotSendEmail,
   forgotPassword,
   changePassword,
-  create,
+  createUser,
+  findOneUser,
+  findAllUser,
+  removeUser,
+  updateUser,
+  // findOne,
 } = require("../controller/users.controller");
+const { isLogin, isAdmin } = require("../middleware/auth.middleware");
 
+const {
+  signup,
+  login,
+  loginGoogle,
+  confirmCode,
+} = require("../controller/auth.controller.js");
+
+//auth
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/loginGoogle", loginGoogle);
+router.post("/confirmCode/:token", confirmCode);
 //user
 router.post("/forgotPassword", forgotSendEmail);
 router.put("/forgotPassword/:token", forgotPassword);
@@ -14,6 +32,13 @@ router.put("/forgotPassword/:token", forgotPassword);
 router.put("/changePassword", changePassword);
 
 //admin
-router.post("/create", create);
+router.post("/", createUser);
+router.get("/", findAllUser);
+router.delete("/:id", removeUser);
+router.put("/:id", updateUser);
+
+router.get("/:id", findOneUser);
+
+// router.post("/:id", findOne);
 
 module.exports = router;

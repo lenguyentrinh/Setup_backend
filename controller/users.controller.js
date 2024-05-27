@@ -2,9 +2,18 @@ const {
   forgotSendEmail,
   forgotPassword,
   changePassword,
-  create,
-} = require("../services/user.service");
-const { validateEmail } = require("../config/validateInput");
+  createUser,
+  findOneUser,
+  findAllUser,
+  removeUser,
+  updateUser,
+
+  // findOne,
+} = require("../services/users.service");
+const {
+  checkInputCreateUser,
+  checkInputUpdateUser,
+} = require("../utils/checkInputUser");
 
 exports.forgotSendEmail = async (req, res) => {
   let result = await forgotSendEmail(req.body);
@@ -30,34 +39,74 @@ exports.changePassword = async (req, res) => {
     error: result.error,
   });
 };
-exports.create = async (req, res) => {
-  let { fullName, email, phone, role, area } = req.body;
-
-  if (!fullName || !email || !phone || !role) {
+exports.createUser = async (req, res) => {
+  let error = checkInputCreateUser(req.body);
+  if (error.length == 0) {
+    let result = await createUser(req.body);
     return res.json({
-      fullName: "Filed must not be empty",
-      email: "Filed must not be empty",
-      phone: "Filed must not be empty",
-      role: "Filed must not be empty",
-      area: "Filed must not be empty",
-    });
-  }
-  if (!validateEmail(email)) {
-    return res.json({ error: "Email is not valid" });
-  } else {
-    let result = await create(req.body);
-
-    return res.json({
-      success: result.success,
+      user: result.user,
+      message: result.message,
       error: result.error,
+      statusCode: result.statusCode,
+      token: result.token,
+    });
+  } else {
+    res.json({ message: error, error: "Bad Request", statusCode: 400 });
+  }
+};
+
+exports.findOneUser = async (req, res) => {
+  let result = await findOneUser(req.params.id);
+  return res.json({
+    user: result.user,
+    message: result.message,
+    error: result.error,
+    statusCode: result.statusCode,
+    token: result.token,
+  });
+};
+exports.findAllUser = async (req, res) => {
+  try {
+    console.log("check");
+    let resutl = await findAllUser();
+    res.json({ allUser: resutl.allUser });
+  } catch (error) {
+    return res.json({ error: error });
+  }
+};
+
+exports.removeUser = async (req, res) => {
+  try {
+    let resutl = await removeUser(req.params.id);
+    res.json({ user: resutl.user });
+  } catch (error) {
+    return res.json({
+      message: error.message,
+      error: error.error,
+      statusCode: error.statusCode,
     });
   }
 };
-// exports.findAll = async (req, res) => {
-//   let result = await findAll(req.body);
 
-//   return res.json({
-//     success: result.success,
-//     error: result.error,
-//   });
-// };
+exports.updateUser = async (req, res) => {
+  try {
+    let error = checkInputUpdateUser(req.body);
+    if (error.length == 0) {
+      let result = await updateUser(req.params.id, req.body);
+      res.json({
+        user: result.user,
+        message: result.message,
+        error: result.error,
+        statusCode: result.statusCode,
+      });
+    } else {
+      res.json({ message: error, error: "Bad Request", statusCode: 400 });
+    }
+  } catch (error) {
+    return res.json({
+      message: error.message,
+      error: error.error,
+      statusCode: error.statusCode,
+    });
+  }
+};

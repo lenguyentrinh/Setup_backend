@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const authRouter = require("./routes/auth.route.js");
 const usersRouter = require("./routes/users.route.js");
+const areasRouter = require("./routes/areas.route.js");
+
 const { connectDB } = require("./config/connectDB.js");
 
 //connectDb
@@ -19,8 +21,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Routes
-app.use("/api", authRouter);
-app.use("/api/user", usersRouter);
+app.use("/api/v1", authRouter);
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/areas", areasRouter);
 
 // Run Server
 const PORT = process.env.PORT || 8000;

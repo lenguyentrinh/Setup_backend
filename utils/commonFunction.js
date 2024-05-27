@@ -16,7 +16,10 @@ exports.validateUserByToken = async (token) => {
 exports.findUserByEmail = async (email) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let user = await userModel.findOne({ email: email });
+      let user = await userModel
+        .findOne({ email: email, isActive: true })
+        .populate("area");
+
       if (user) {
         resolve(user);
       } else {
@@ -30,7 +33,9 @@ exports.findUserByEmail = async (email) => {
 exports.findUserByPhone = async (phone) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let user = await userModel.findOne({ phone: phone });
+      let user = await userModel
+        .findOne({ phone: phone, isActive: true })
+        .populate("area");
       if (user) {
         resolve(user);
       } else {
@@ -44,7 +49,6 @@ exports.findUserByPhone = async (phone) => {
 exports.hashUserPassword = async (password) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("test 1", password);
       var hashPassword = await bcrypt.hashSync(password, salt);
       resolve(hashPassword);
     } catch (error) {

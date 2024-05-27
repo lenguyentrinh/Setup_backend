@@ -55,6 +55,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    area: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "areas",
+    },
     role: {
       type: Number,
       enum: [roleEnum.ADMIN, roleEnum.STAFF, roleEnum.SHIP, roleEnum.USER],
