@@ -1,19 +1,18 @@
 const {
-  createArea,
-  findAllArea,
-  findOneArea,
-  removeArea,
-  updateArea,
-} = require("../services/areas.service");
-const { checkInputCreateArea } = require("../utils/checkInputArea");
-exports.createArea = async (req, res) => {
-  let error = checkInputCreateArea(req.body);
+  createCategory,
+  findAllCategory,
+  findOneCategory,
+  removeCategory,
+  updateCategory,
+} = require("../services/categories.service");
+const { checkInputCreateCategory } = require("../utils/CheckInputCategory");
+exports.createCategory = async (req, res) => {
+  let error = checkInputCreateCategory(req.body);
   if (error.length == 0) {
     try {
-      console.log("test");
-      let result = await createArea(req.body);
+      let result = await createCategory(req.body);
       return res.json({
-        area: result.area,
+        category: result.category,
         message: result.message,
         error: result.error,
         statusCode: result.statusCode,
@@ -26,21 +25,20 @@ exports.createArea = async (req, res) => {
   }
 };
 
-exports.findAllArea = async (req, res) => {
+exports.findAllCategory = async (req, res) => {
   try {
-    let resutl = await findAllArea();
-    res.json({ allArea: resutl.allArea });
+    let resutl = await findAllCategory();
+    res.json({ allCategory: resutl.allCategory });
   } catch (error) {
     return res.json({ error: error });
   }
 };
 
-exports.findOneArea = async (req, res) => {
+exports.findOneCategory = async (req, res) => {
   try {
-    console.log("test", req.params.id);
-    let result = await findOneArea(req.params.id);
+    let result = await findOneCategory(req.params.id);
     res.json({
-      area: result.area,
+      category: result.category,
       message: result.message,
       error: result.error,
       statusCode: result.statusCode,
@@ -54,10 +52,10 @@ exports.findOneArea = async (req, res) => {
   }
 };
 
-exports.removeArea = async (req, res) => {
+exports.removeCategory = async (req, res) => {
   try {
-    let resutl = await removeArea(req.params.id);
-    res.json({ area: resutl.area });
+    let resutl = await removeCategory(req.params.id);
+    res.json({ category: resutl.category });
   } catch (error) {
     return res.json({
       message: error.message,
@@ -67,13 +65,13 @@ exports.removeArea = async (req, res) => {
   }
 };
 
-exports.updateArea = async (req, res) => {
-  let error = checkInputCreateArea(req.body);
+exports.updateCategory = async (req, res) => {
+  let error = checkInputCreateCategory(req.body);
   if (error.length == 0) {
     try {
-      let result = await updateArea(req.params.id, req.body);
+      let result = await updateCategory(req.params.id, req.body);
       res.json({
-        area: result.area,
+        category: result.category,
         message: result.message,
         error: result.error,
         statusCode: result.statusCode,
@@ -86,6 +84,6 @@ exports.updateArea = async (req, res) => {
       });
     }
   } else {
-    return res.json({ error: error });
+    res.json({ message: error, error: "Bad Request", statusCode: 400 });
   }
 };

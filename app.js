@@ -7,6 +7,7 @@ const cors = require("cors");
 const authRouter = require("./routes/auth.route.js");
 const usersRouter = require("./routes/users.route.js");
 const areasRouter = require("./routes/areas.route.js");
+const categoriesRouter = require("./routes/categories.route.js");
 
 const { connectDB } = require("./config/connectDB.js");
 
@@ -23,6 +24,7 @@ app.use(express.json());
 // Routes
 app.use("/api/v1", authRouter);
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/areas", areasRouter);
 
 // Run Server
